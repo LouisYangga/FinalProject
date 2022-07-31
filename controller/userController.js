@@ -34,7 +34,7 @@ const loginUser = asyncHandler(async(req, res) => {
 // res USER status 201
 
 const registerUser = asyncHandler(async(req, res) => {
-    const { role, firstName, lastName, email, password, DOB, gender, id } = req.body;
+    const { role, firstName, lastName, email, password, DOB, gender, id, parentId } = req.body;
 
     if (!firstName || !lastName || !email || !password || !role) {
         res.status(400)
