@@ -7,11 +7,6 @@ app.use(cors())
 
 const port = 5000;
 
-// const admin = require('./models/admin');
-// const parent = require('./models/parent');
-// const student = require('./models/student');
-// const subject = require('./models/subject');
-// const teacher = require('./models/teacher');
 require('./db');
 
 app.use('/api/users', require('./routes/userRoutes'));
