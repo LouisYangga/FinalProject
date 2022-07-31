@@ -1,0 +1,25 @@
+const express = require('express');
+const app = express();
+var cors = require('cors');
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cors())
+
+const port = 5000;
+
+// const admin = require('./models/admin');
+// const parent = require('./models/parent');
+// const student = require('./models/student');
+// const subject = require('./models/subject');
+// const teacher = require('./models/teacher');
+require('./db');
+
+app.use('/api/users', require('./routes/userRoutes'));
+
+app.get('/', (req, res) => {
+    res.json('Server side');
+})
+
+app.listen(port, () => {
+    console.log(`Mongo App | listening at http://localhost:${port}`);
+})
