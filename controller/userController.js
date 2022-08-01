@@ -96,6 +96,14 @@ const changePass = asyncHandler(async(req, res) => {
     }
 })
 
+//update details
+//PUT /api/users/updateDetails
+//BODY firstName, lastName, email, password, DOB, gender
+//res status 202
+const updateDetails = asyncHandler(async(req, res) => {
+    const { firstName, lastName, email, password, DOB, gender } = req.body;
+})
+
 const findUser = (async(field, data) => {
     var user = await admin.findOne({
         [field]: data
