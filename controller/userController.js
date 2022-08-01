@@ -34,9 +34,9 @@ const loginUser = asyncHandler(async(req, res) => {
 // res USER status 201
 
 const registerUser = asyncHandler(async(req, res) => {
-    const { role, firstName, lastName, email, password, DOB, gender, id, parentId } = req.body;
+    const { role, firstName, lastName, email, password, DOB, gender } = req.body;
 
-    if (!firstName || !lastName || !email || !password || !role) {
+    if (!firstName || !email || !password || !role) {
         res.status(400)
         throw new Error('Please add all fields')
     }
@@ -97,11 +97,32 @@ const changePass = asyncHandler(async(req, res) => {
 })
 
 //update details
-//PUT /api/users/updateDetails
-//BODY firstName, lastName, email, password, DOB, gender
+//PUT /api/users/update-details
+//BODY 
 //res status 202
 const updateDetails = asyncHandler(async(req, res) => {
-    const { firstName, lastName, email, password, DOB, gender } = req.body;
+    const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country } = req.body;
+
+    if (!firstName || !email || !DOB || !role) {
+        res.status(400)
+        throw new Error('Please add first name, email, role and DOB')
+    }
+
+    await updateData(email, role, "firstName", firstName);
+    await updateData(email, role, "lastName", lastName);
+    await updateData(email, role, "DOB", DOB);
+    await updateData(email, role, "gender", gender);
+
+    if (role.toLowerCase() !== "admin") {
+        await updateData(email, role, "address.street", street);
+        await updateData(email, role, "address.suburb", suburb);
+        await updateData(email, role, "address.city", city);
+        await updateData(email, role, "address.postCode", postCode);
+        await updateData(email, role, "address.state", state);
+        await updateData(email, role, "address.country", country);
+    }
+    res.status(202).json("Update successfull");
+
 })
 
 const findUser = (async(field, data) => {
@@ -192,4 +213,4 @@ const insertUser = asyncHandler(async(role, body) => {
 })
 
 
-module.exports = { loginUser, registerUser, changePass };
+module.exports = { loginUser, registerUser, changePass, updateDetails };
