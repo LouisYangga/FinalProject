@@ -28,6 +28,45 @@ const loginUser = asyncHandler(async(req, res) => {
     }
 })
 
+//find one user 
+//GET /api/users/find
+//BODY field, data
+//res USER
+const getUser = asyncHandler(async(req, res) => {
+        const { field, data } = req.body;
+        var user = await findUser(field, data);
+
+        if (field === "id" && !data) {
+            res.status(400).json("id field cannot be empty");
+        }
+        if (user) {
+            res.status(201).json({
+                "role": user.role,
+                "id": user.id,
+                "firstName": user.firstName,
+                "lastName": user.lastName,
+                "email": user.email,
+                "gender": user.gender,
+                "DOB": user.DOB,
+                "enrolled childrenId": user.enrolledChildrenId,
+                "subject Ids": user.enrolledSubjectId,
+                "address": user.address
+            });
+        }
+        res.status(400)
+        throw new Error('User not found');
+    })
+    //find one user 
+    //GET /api/users/users
+    //BODY
+    //res USERS
+const getUsers = asyncHandler(async(req, res) => {
+    var users = await teacher.find({});
+    users.push(await parent.find({}));
+    users.push(await student.find({}));
+    res.status(200).json(users)
+})
+
 // register new user
 // POST/ api/users
 // BODY role, firstName, lastName, email, password -> {required}, DOB, gender
@@ -219,4 +258,4 @@ const insertUser = asyncHandler(async(role, body) => {
 })
 
 
-module.exports = { loginUser, registerUser, changePass, updateDetails };
+module.exports = { loginUser, registerUser, changePass, updateDetails, getUser, getUsers };
