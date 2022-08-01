@@ -34,7 +34,7 @@ const loginUser = asyncHandler(async(req, res) => {
 // res USER status 201
 
 const registerUser = asyncHandler(async(req, res) => {
-    const { role, firstName, lastName, email, password, DOB, gender } = req.body;
+    const { role, firstName, lastName, email, password, DOB, gender, parentId } = req.body;
 
     if (!firstName || !email || !password || !role) {
         res.status(400)
@@ -69,7 +69,8 @@ const registerUser = asyncHandler(async(req, res) => {
         res.status(200).json({
             "user id": userID,
             "email": email,
-            "role": roles
+            "role": roles,
+            "parentID": parentId
         });
     }
     console.log('User has been registered, thank you :)');
@@ -98,16 +99,20 @@ const changePass = asyncHandler(async(req, res) => {
 
 //update details
 //PUT /api/users/update-details
-//BODY 
+//BODY firstName, email, DOB, and role are required. 
 //res status 202
 const updateDetails = asyncHandler(async(req, res) => {
-    const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country } = req.body;
+    const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country, newEmail } = req.body;
 
     if (!firstName || !email || !DOB || !role) {
         res.status(400)
         throw new Error('Please add first name, email, role and DOB')
     }
-
+    var user = await findUser('email', email);
+    if (!user) {
+        res.status(400)
+        throw new Error('User not found')
+    }
     await updateData(email, role, "firstName", firstName);
     await updateData(email, role, "lastName", lastName);
     await updateData(email, role, "DOB", DOB);
@@ -121,7 +126,8 @@ const updateDetails = asyncHandler(async(req, res) => {
         await updateData(email, role, "address.state", state);
         await updateData(email, role, "address.country", country);
     }
-    res.status(202).json("Update successfull");
+    await updateData(email, role, "email", newEmail);
+    res.status(202).json("Update successful");
 
 })
 
