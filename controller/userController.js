@@ -35,7 +35,6 @@ const loginUser = asyncHandler(async(req, res) => {
 const getUser = asyncHandler(async(req, res) => {
         const { field, data } = req.body;
         var user = await findUser(field, data);
-
         if (field === "id" && !data) {
             res.status(400).json("id field cannot be empty");
         }
@@ -56,7 +55,7 @@ const getUser = asyncHandler(async(req, res) => {
         res.status(400)
         throw new Error('User not found');
     })
-    //find one user 
+    //list users 
     //GET /api/users/users
     //BODY
     //res USERS
