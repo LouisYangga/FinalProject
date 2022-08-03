@@ -1,8 +1,7 @@
 const express = require('express');
-const { getChildren } = require('../controller/parentCcontroller');
+const { getChildren } = require('../controller/parentController');
 const router = express.Router();
 const { loginUser, registerUser, changePass, updateDetails, getUser, getUsers } = require('../controller/userController');
-const { getChildren } = require('../controller/parentCcontroller');
 
 router.post('/login', loginUser);
 router.post('/', registerUser);
