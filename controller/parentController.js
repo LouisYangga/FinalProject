@@ -12,7 +12,7 @@ const getChildren = asyncHandler(async(req, res) => {
         res.status(400).json('No enrolled children');
     }
     var children = [];
-    for (var i = 0; i < childrenId.length; i++) {
+    for (var i = 0; i < childrenId.length - 1; i++) {
         children.push(await student.find({ parentId: id }))
     }
     res.status(200).json(children);

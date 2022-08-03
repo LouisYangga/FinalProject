@@ -98,10 +98,10 @@ const registerUser = asyncHandler(async(req, res) => {
 
     if (await insertUser(roles, req.body) !== null) {
         if (roles === 'student' && parentId !== null) {
-            parent.updateOne({
-                id: userID
+            await parent.updateOne({
+                id: parentId
             }, {
-                $push: { enrolledChildrenId: parentId }
+                $push: { enrolledChildrenId: userID }
             })
         }
         res.status(200).json({
