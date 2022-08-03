@@ -3,6 +3,7 @@ const parent = require('../models/parent');
 const admin = require('../models/admin');
 const student = require('../models/student');
 const teacher = require('../models/teacher');
+const subject = require('../models/subject');
 
 const getAll = asyncHandler(async() => {
     var users = await teacher.find({});
@@ -97,6 +98,5 @@ const insertUser = asyncHandler(async(role, body) => {
     }
 
 })
-
 
 module.exports = { findUser, updateData, insertUser, getAll };

@@ -8,7 +8,6 @@ app.use(cors())
 const port = 5000;
 
 require('./db');
-
 app.use('/api/users', require('./routes/userRoutes'));
 
 app.get('/', (req, res) => {

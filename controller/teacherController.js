@@ -10,7 +10,10 @@ const getSubject = asyncHandler(async(subjectId) => {
     return await subjectDb.findOne({ id: subjectId });
 })
 
-
+// enroll student
+// PUT/ api/users/teacher/enroll
+// BODY studentId, subjectId
+// res status 200 `Student with id: ${studentId}, enrolled into subject (${subjectId})`
 const enrollStudent = asyncHandler(async(req, res) => {
     const { studentId, subjectId } = req.body;
     var student = await getStudent(studentId);
