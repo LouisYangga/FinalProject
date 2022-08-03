@@ -21,26 +21,36 @@ const enrollStudent = asyncHandler(async(req, res) => {
 
     if (!subject || !student) {
         res.status(400).json('subject or student id not valid');
+        throw new Error('subject or student id not valid')
     }
+    var subjectLength = student.enrolledSubjectId.length;
     const capacity = 20; //class capacity
-    if (subject.enrolledStudentId.length > capacity) {
+    if (subject.enrolledStudentId.length + 1 > capacity) {
         res.status(400).json('Class for this subject is full');
+        throw new Error('Class for this subject is full')
+
     }
     const max = 3; //max subject
-    if (student.enrolledSubjectId > max) {
+    if (subjectLength + 1 > max) {
         res.status(400).json('You already has 3 subjects');
+        throw new Error('You already has 3 subjects')
     }
-
     await studentDb.updateOne({
         id: studentId
     }, {
-        $push: { enrolledSubjectId: subjectId }
+        $addToSet: { enrolledSubjectId: subjectId }
     })
+    student = await getStudent(studentId);
+    var changed = student.enrolledSubjectId.length;
+    if (changed === subjectLength) {
+        res.status(400).json(`You enrolled to subject ${subjectId}`);
+        throw new Error(`You enrolled to subject ${subjectId}`);
+    }
 
     await subjectDb.updateOne({
         id: subjectId
     }, {
-        $push: { enrolledStudentId: studentId }
+        $addToSet: { enrolledStudentId: studentId }
     })
 
     res.status(201).json(`Student with id: ${studentId}, enrolled into subject (${subjectId})`);

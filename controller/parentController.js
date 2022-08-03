@@ -15,6 +15,7 @@ const getChildren = asyncHandler(async(req, res) => {
     const childrenId = person.enrolledChildrenId;
     if (childrenId.length === 0) {
         res.status(400).json('No enrolled children');
+        throw new Error(`No enrolled children`)
     }
     var children = await student.find({ parentId: id })
     res.status(200).json(children);
