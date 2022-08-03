@@ -9,10 +9,10 @@ const student = require('../models/student');
 
 const getChildren = asyncHandler(async(req, res) => {
     const { id } = req.body;
-    const parent = await parent.findOne({
+    const person = await parent.findOne({
         id: id
     });
-    const childrenId = parent.enrolledChildrenId;
+    const childrenId = person.enrolledChildrenId;
     if (childrenId.length === 0) {
         res.status(400).json('No enrolled children');
     }
