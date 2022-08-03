@@ -1,6 +1,4 @@
-const validator = require('validator');
 const asyncHandler = require('express-async-handler')
-
 const parent = require('../models/parent');
 const student = require('../models/student');
 

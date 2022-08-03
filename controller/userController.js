@@ -3,10 +3,8 @@ const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcrypt');
 var validateDate = require("validate-date");
 const saltRounds = 10;
-const { findUser, updateData, insertUser } = require('./utils')
+const { findUser, updateData, insertUser, getAll } = require('./utils')
 const parent = require('../models/parent');
-const student = require('../models/student');
-const teacher = require('../models/teacher');
 
 //login user 
 //POST /api/users/login
@@ -15,7 +13,6 @@ const teacher = require('../models/teacher');
 
 const loginUser = asyncHandler(async(req, res) => {
     const { email, password } = req.body;
-
     const user = await findUser('email', email);
     // (await bcrypt.compare(password, user.password)
     if (user && user.password === password) {
@@ -58,9 +55,7 @@ const getUser = asyncHandler(async(req, res) => {
     //BODY
     //res USERS
 const getUsers = asyncHandler(async(req, res) => {
-    var users = await teacher.find({});
-    users.push(await parent.find({}));
-    users.push(await student.find({}));
+    var users = await getAll();
     res.status(200).json(users)
 })
 
