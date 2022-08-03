@@ -41,7 +41,7 @@ const parentSchema = mongoose.Schema({
         state: { type: String },
         country: { type: String }
     },
-    enrolledChildrenId: [Number]
+    enrolledChildrenId: []
 }, {
     timestamps: true
 })
