@@ -1,10 +1,15 @@
-const validator = require('validator');
 const asyncHandler = require('express-async-handler')
-
 const parent = require('../models/parent');
 const admin = require('../models/admin');
 const student = require('../models/student');
 const teacher = require('../models/teacher');
+
+const getAll = asyncHandler(async() => {
+    var users = await teacher.find({});
+    users.push(await parent.find({}));
+    users.push(await student.find({}));
+    return users;
+})
 
 const findUser = (async(field, data) => {
     var user = await admin.findOne({
@@ -94,4 +99,4 @@ const insertUser = asyncHandler(async(role, body) => {
 })
 
 
-module.exports = { findUser, updateData, insertUser };
+module.exports = { findUser, updateData, insertUser, getAll };

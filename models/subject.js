@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const subjectSchema = mongoose.Schema({
-    subjectID: {
+    id: {
         type: String,
         required: [true, 'Generate ID fail']
     },
@@ -19,7 +19,7 @@ const subjectSchema = mongoose.Schema({
     endDate: {
         type: String
     },
-    enrolledStudentsId: [Number]
+    enrolledStudentId: [Number]
 }, {
     timestamps: true
 })
