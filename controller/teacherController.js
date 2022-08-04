@@ -56,4 +56,5 @@ const enrollStudent = asyncHandler(async(req, res) => {
     res.status(201).json(`Student with id: ${studentId}, enrolled into subject (${subjectId})`);
 })
 
+
 module.exports = { enrollStudent };
