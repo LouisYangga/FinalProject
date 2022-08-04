@@ -4,13 +4,12 @@ const bcrypt = require('bcrypt');
 var validateDate = require("validate-date");
 const saltRounds = 10;
 const { findUser, updateData, insertUser, getAll } = require('./utils')
-const parent = require('../models/parent');
+const mongoose = require('mongoose');
 
 //login user 
 //POST /api/users/login
 //BODY email and password
 //res USER
-
 const loginUser = asyncHandler(async(req, res) => {
     const { email, password } = req.body;
     const user = await findUser('email', email);
@@ -98,7 +97,7 @@ const registerUser = asyncHandler(async(req, res) => {
 
     if (await insertUser(roles, req.body) !== null) {
         if (roles === 'student' && parentId !== null) {
-            await parent.updateOne({
+            await mongoose.model("parent").updateOne({
                 id: parentId
             }, {
                 $push: { enrolledChildrenId: userID }
@@ -140,34 +139,48 @@ const changePass = asyncHandler(async(req, res) => {
 //BODY firstName, email, DOB, and role are required. 
 //res status 202
 const updateDetails = asyncHandler(async(req, res) => {
-    const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country, newEmail } = req.body;
+        const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country, newEmail } = req.body;
 
-    if (!firstName || !email || !DOB || !role) {
-        res.status(400)
-        throw new Error('Please add first name, email, role and DOB')
-    }
-    var user = await findUser('email', email);
+        if (!firstName || !email || !DOB || !role) {
+            res.status(400)
+            throw new Error('Please add first name, email, role and DOB')
+        }
+        var user = await findUser('email', email);
+        if (!user) {
+            res.status(400)
+            throw new Error('User not found')
+        }
+        await updateData(email, role, "firstName", firstName);
+        await updateData(email, role, "lastName", lastName);
+        await updateData(email, role, "DOB", DOB);
+        await updateData(email, role, "gender", gender);
+
+        if (role.toLowerCase() !== "admin") {
+            await updateData(email, role, "address.street", street);
+            await updateData(email, role, "address.suburb", suburb);
+            await updateData(email, role, "address.city", city);
+            await updateData(email, role, "address.postCode", postCode);
+            await updateData(email, role, "address.state", state);
+            await updateData(email, role, "address.country", country);
+        }
+        await updateData(email, role, "email", newEmail);
+        res.status(202).json("Update successful");
+
+    })
+    //Remove user
+    //DELETE /api/users/remove
+    //BODY userId
+    //res status 200
+const removeUser = asyncHandler(async(req, res) => {
+    const { userId } = req.body;
+    var user = await findUser("id", userId);
     if (!user) {
-        res.status(400)
-        throw new Error('User not found')
+        res.status(400).json('user not found');
+        throw new Error('User not found');
     }
-    await updateData(email, role, "firstName", firstName);
-    await updateData(email, role, "lastName", lastName);
-    await updateData(email, role, "DOB", DOB);
-    await updateData(email, role, "gender", gender);
-
-    if (role.toLowerCase() !== "admin") {
-        await updateData(email, role, "address.street", street);
-        await updateData(email, role, "address.suburb", suburb);
-        await updateData(email, role, "address.city", city);
-        await updateData(email, role, "address.postCode", postCode);
-        await updateData(email, role, "address.state", state);
-        await updateData(email, role, "address.country", country);
-    }
-    await updateData(email, role, "email", newEmail);
-    res.status(202).json("Update successful");
-
+    await mongoose.model(user.role).deleteOne({ id: userId });
+    // await Collection[user.role].deleteOne({ id: userId });
+    res.status(200).json(`User ${userId} removed`);
 })
 
-
-module.exports = { loginUser, registerUser, changePass, updateDetails, getUser, getUsers };
+module.exports = { loginUser, registerUser, changePass, updateDetails, getUser, getUsers, removeUser };

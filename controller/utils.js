@@ -4,6 +4,7 @@ const admin = require('../models/admin');
 const student = require('../models/student');
 const teacher = require('../models/teacher');
 const subject = require('../models/subject');
+const mongoose = require('mongoose');
 
 const getAll = asyncHandler(async() => {
     var users = await teacher.find({});
@@ -38,26 +39,8 @@ const findUser = (async(field, data) => {
 })
 
 const updateData = asyncHandler(async(email, role, column, newData) => {
-    if (role.toLowerCase() === "admin") {
-        await admin.updateOne({ email: email }, {
-            $set: {
-                [column]: newData
-            }
-        });
-    } else if (role.toLowerCase() === "parent") {
-        await parent.updateOne({ email: email }, {
-            $set: {
-                [column]: newData
-            }
-        });
-    } else if (role.toLowerCase() === "student") {
-        await student.updateOne({ email: email }, {
-            $set: {
-                [column]: newData
-            }
-        });
-    } else if (role.toLowerCase() === "teacher") {
-        await teacher.updateOne({ email: email }, {
+    if (role.toLowerCase() === "admin" || role.toLowerCase() === "teacher" || role.toLowerCase() === "parent" || role.toLowerCase() === "student") {
+        await mongoose.model(role).updateOne({ email: email }, {
             $set: {
                 [column]: newData
             }
@@ -68,35 +51,13 @@ const updateData = asyncHandler(async(email, role, column, newData) => {
 })
 
 const insertUser = asyncHandler(async(role, body) => {
-    if (role === "student") {
-        student.insertMany(body, (error, result) => {
-            if (error) {
-                console.log(error)
-                return false;
-            } else {
-                return body;
-            }
-        })
-    } else if (role === "teacher") {
-        teacher.insertMany(body, (error, result) => {
-            if (error) {
-                console.log(error)
-                return false;
-            } else {
-                return body;
-            }
-        })
-    } else {
-        parent.insertMany(body, (error, result) => {
-            if (error) {
-                console.log(error)
-                return true;
-            } else {
-                return body;
-            }
-        })
-    }
-
+    mongoose.model(role).insertMany(body, (error, result) => {
+        if (error) {
+            throw new Error(error);
+        } else {
+            return body;
+        }
+    })
 })
 
 module.exports = { findUser, updateData, insertUser, getAll };
