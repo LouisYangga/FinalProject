@@ -5,6 +5,7 @@ var validateDate = require("validate-date");
 const saltRounds = 10;
 const { findUser, updateData, insertUser, getAll } = require('./utils')
 const mongoose = require('mongoose');
+const parent = require('../models/parent');
 
 //login user 
 //POST /api/users/login
@@ -145,7 +146,7 @@ const updateDetails = asyncHandler(async(req, res) => {
             res.status(400)
             throw new Error('Please add first name, email, role and DOB')
         }
-        var user = await findUser('email', email);
+        var user = await mongoose.model(role.toLowerCase()).findOne({ email: email });
         if (!user) {
             res.status(400)
             throw new Error('User not found')
@@ -163,6 +164,11 @@ const updateDetails = asyncHandler(async(req, res) => {
             await updateData(email, role, "address.state", state);
             await updateData(email, role, "address.country", country);
         }
+        const duplicateEmail = await findUser('email', newEmail);
+        if (duplicateEmail) {
+            res.status(400)
+            throw new Error('Email has been used by other user');
+        }
         await updateData(email, role, "email", newEmail);
         res.status(202).json("Update successful");
 
@@ -178,8 +184,16 @@ const removeUser = asyncHandler(async(req, res) => {
         res.status(400).json('user not found');
         throw new Error('User not found');
     }
+    var parent = await mongoose.model('parent').findOne({ id: user.parentId });
+    if (parent) {
+        await mongoose.model('parent').updateOne({ id: user.parentId }, {
+            $pull: {
+                enrolledChildrenId: parseInt(userId)
+            }
+        });
+    }
+
     await mongoose.model(user.role).deleteOne({ id: userId });
-    // await Collection[user.role].deleteOne({ id: userId });
     res.status(200).json(`User ${userId} removed`);
 })
 
