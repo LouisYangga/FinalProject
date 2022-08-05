@@ -11,7 +11,7 @@ router.put('/change-pass', changePass);
 router.put('/update-details', updateDetails);
 router.put('/teacher/enroll', enrollStudent);
 
-router.get('/find', getUser);
+router.get('/find/:field/:data', getUser);
 router.get('/users', getUsers);
 router.get('/parent/children', getChildren);
 

@@ -28,7 +28,8 @@ const loginUser = asyncHandler(async(req, res) => {
 //BODY field, data
 //res USER
 const getUser = asyncHandler(async(req, res) => {
-        const { field, data } = req.body;
+        var field = req.params.field;
+        var data = req.params.data;
         var user = await findUser(field, data);
         if (field === "id" && !data) {
             res.status(400).json("id field cannot be empty");
