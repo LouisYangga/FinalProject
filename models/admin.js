@@ -5,10 +5,6 @@ const adminSchema = mongoose.Schema({
         type: String,
         require: [true, 'Please insert role']
     },
-    id: {
-        type: String,
-        require: [true, 'Generate ID fail']
-    },
     firstName: {
         type: String,
         require: [true, 'Please add first name']
@@ -32,7 +28,8 @@ const adminSchema = mongoose.Schema({
     password: {
         type: String,
         require: [true, 'Please enter password']
-    }
+    },
+    id: {}
 }, {
     timestamps: true
 })

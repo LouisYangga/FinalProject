@@ -86,14 +86,13 @@ const registerUser = asyncHandler(async(req, res) => {
     const duplicateEmail = await findUser('email', email);
     var duplicateID = true;
     if (duplicateEmail) {
-        console.log(email);
         res.status(400)
         throw new Error('Email has been used')
     }
     while (duplicateID) {
         userID = (Math.floor(Math.random() * 100)) + 999;
         req.body.id = userID;
-        duplicateID = await findUser('id', userID);
+        duplicateID = await findUser('id', userID)
     }
 
     if (await insertUser(roles, req.body) !== null) {

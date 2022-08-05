@@ -8,8 +8,15 @@ const mongoose = require('mongoose');
 
 const getAll = asyncHandler(async() => {
     var users = await teacher.find({});
-    users.push(await parent.find({}));
-    users.push(await student.find({}));
+    var parents = await parent.find({});
+    var students = await student.find({});
+
+    parents.forEach(parent => {
+        users.push(parent);
+    });
+    students.forEach(student => {
+        users.push(student);
+    });
     return users;
 })
 
