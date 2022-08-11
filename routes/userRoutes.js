@@ -13,7 +13,7 @@ router.put('/teacher/enroll', enrollStudent);
 
 router.get('/find/:field/:data', getUser);
 router.get('/users', getUsers);
-router.get('/parent/children', getChildren);
+router.get('/parent/children/:id', getChildren);
 
 router.delete('/remove', removeUser)
 module.exports = router;

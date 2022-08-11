@@ -8,7 +8,7 @@ const student = require('../models/student');
 // res children status 200
 
 const getChildren = asyncHandler(async(req, res) => {
-    const { id } = req.body;
+    var id = req.params.id
     const person = await parent.findOne({
         id: id
     });
