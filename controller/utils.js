@@ -4,7 +4,9 @@ const admin = require('../models/admin');
 const student = require('../models/student');
 const teacher = require('../models/teacher');
 const subject = require('../models/subject');
+const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
+const { text } = require('body-parser');
 
 const getAll = asyncHandler(async() => {
     var users = await teacher.find({});
@@ -67,4 +69,29 @@ const insertUser = asyncHandler(async(role, body) => {
     })
 })
 
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'way.space00@gmail.com',
+        pass: 'befc buac bjcm ehuu'
+    }
+});
+
+var mailOptions = ((receiver, subject, text) => {
+
+})
+var mailOptions = {
+    from: 'way.space00@gmail.com',
+    to: 'louis.yangga@gmail.com',
+    subject: 'Sending Email using Node.js',
+    text: 'That was easy!'
+};
+
+transporter.sendMail(mailOptions, function(error, info) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log('Email sent: ' + info.response);
+    }
+});
 module.exports = { findUser, updateData, insertUser, getAll };
