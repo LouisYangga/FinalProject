@@ -6,7 +6,10 @@ const teacher = require('../models/teacher');
 const subject = require('../models/subject');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
-const { text } = require('body-parser');
+const fs = require('fs');
+const { promisify } = require('util');
+const { template } = require('handlebars');
+const readFile = promisify(fs.readFile);
 
 const getAll = asyncHandler(async() => {
     var users = await teacher.find({});
@@ -69,29 +72,35 @@ const insertUser = asyncHandler(async(role, body) => {
     })
 })
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'way.space00@gmail.com',
-        pass: 'befc buac bjcm ehuu'
-    }
-});
+const sendEmail = (async(receiver, subject, html) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'way.space00@gmail.com',
+            pass: 'befc buac bjcm ehuu'
+        }
+    });
 
-var mailOptions = ((receiver, subject, text) => {
 
+    fs.readFile(html, { encoding: 'utf-8' }, function(err, html) {
+        if (err) {
+            console.log(err);
+        } else {
+            var mailOptions = {
+                from: 'way.space00@gmail.com',
+                to: receiver,
+                subject: subject,
+                html: html
+            };
+            transporter.sendMail(mailOptions, function(error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+        }
+    })
 })
-var mailOptions = {
-    from: 'way.space00@gmail.com',
-    to: 'louis.yangga@gmail.com',
-    subject: 'Sending Email using Node.js',
-    text: 'That was easy!'
-};
 
-transporter.sendMail(mailOptions, function(error, info) {
-    if (error) {
-        console.log(error);
-    } else {
-        console.log('Email sent: ' + info.response);
-    }
-});
-module.exports = { findUser, updateData, insertUser, getAll };
+module.exports = { findUser, updateData, insertUser, getAll, sendEmail };
