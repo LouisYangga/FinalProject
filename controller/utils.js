@@ -7,9 +7,6 @@ const subject = require('../models/subject');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const { promisify } = require('util');
-const { template } = require('handlebars');
-const readFile = promisify(fs.readFile);
 
 const getAll = asyncHandler(async() => {
     var users = await teacher.find({});
@@ -62,6 +59,20 @@ const updateData = asyncHandler(async(email, role, column, newData) => {
     }
 })
 
+const updatePass = asyncHandler(async(email, oldPass, newPass) => {
+    var user = await findUser('email', email);
+    if (user && user.password === oldPass) {
+        await updateData(email, user.role, "password", newPass);
+        user = await findUser('email', email);
+        if (user.password !== oldPass) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+})
 const insertUser = asyncHandler(async(role, body) => {
     mongoose.model(role).insertMany(body, (error, result) => {
         if (error) {
@@ -72,7 +83,7 @@ const insertUser = asyncHandler(async(role, body) => {
     })
 })
 
-const sendEmail = (async(receiver, subject, html) => {
+const sendEmail = (async(receiver, subject, html, link) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -90,7 +101,7 @@ const sendEmail = (async(receiver, subject, html) => {
                 from: 'way.space00@gmail.com',
                 to: receiver,
                 subject: subject,
-                html: html
+                text: link
             };
             transporter.sendMail(mailOptions, function(error, info) {
                 if (error) {
@@ -102,5 +113,4 @@ const sendEmail = (async(receiver, subject, html) => {
         }
     })
 })
-
-module.exports = { findUser, updateData, insertUser, getAll, sendEmail };
+module.exports = { findUser, updateData, insertUser, getAll, updatePass, sendEmail };

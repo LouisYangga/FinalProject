@@ -3,9 +3,10 @@ const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcrypt');
 var validateDate = require("validate-date");
 const saltRounds = 10;
-const { findUser, updateData, insertUser, getAll } = require('./utils')
+const { findUser, updateData, insertUser, getAll, updatePass, sendEmail } = require('./utils')
 const mongoose = require('mongoose');
 const parent = require('../models/parent');
+const { update } = require('../models/parent');
 
 //login user 
 //POST /api/users/login
@@ -120,63 +121,92 @@ const registerUser = asyncHandler(async(req, res) => {
 //res status 202
 const changePass = asyncHandler(async(req, res) => {
     const { email, oldPass, newPass } = req.body;
-    var user = await findUser('email', email);
-    if (user && user.password === oldPass) {
-        await updateData(email, user.role, "password", newPass);
-        user = await findUser('email', email);
-        if (user.password !== oldPass) {
-            res.status(200).json("Update successful");
-        } else {
-            res.status(400).json("password not updated");
-        }
+    if (updatePass(email, oldPass, newPass) === true) {
+        res.status(200).json('Password Updated');
     } else {
-        res.status(400)
-        throw Error("Invalid Credentials");
+        res.status(400).json('Invalid');
+        throw new Error('Invalid Credentials')
     }
 })
 
-//update details
-//PUT /api/users/update-details
-//BODY firstName, email, DOB, and role are required. 
+//reset password
+//PUT /api/users/reset/:id
+//BODY email, newPass
 //res status 202
-const updateDetails = asyncHandler(async(req, res) => {
-        const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country, newEmail } = req.body;
+const resetPass = asyncHandler(async(req, res) => {
+    const { newPass } = req.body;
+    var id = (req.params.id - 1000) / 1000;
+    var user = await findUser('id', id);
+    if (!user) {
+        throw new Error('Email Invalid');
+    }
+    var pass = user.password;
+    updatePass(user.email, pass, newPass);
+    res.status(200).json('password reset');
+})
 
-        if (!firstName || !email || !DOB || !role) {
-            res.status(400)
-            throw new Error('Please add first name, email, role and DOB')
-        }
-        var user = await mongoose.model(role.toLowerCase()).findOne({ email: email });
+//send email 
+//POST /api/users/email
+//BODY email, subject, html
+//res status 200
+const email = asyncHandler(async(req, res) => {
+        const { email, subject, html } = req.body;
+
+        var user = await findUser('email', email);
         if (!user) {
-            res.status(400)
-            throw new Error('User not found')
+            throw new Error('Email Invalid');
         }
-        await updateData(email, role, "firstName", firstName);
-        await updateData(email, role, "lastName", lastName);
-        await updateData(email, role, "DOB", DOB);
-        await updateData(email, role, "gender", gender);
-
-        if (role.toLowerCase() !== "admin") {
-            await updateData(email, role, "address.street", street);
-            await updateData(email, role, "address.suburb", suburb);
-            await updateData(email, role, "address.city", city);
-            await updateData(email, role, "address.postCode", postCode);
-            await updateData(email, role, "address.state", state);
-            await updateData(email, role, "address.country", country);
-        }
-        const duplicateEmail = await findUser('email', newEmail);
-        if (duplicateEmail) {
-            res.status(400)
-            throw new Error('Email has been used by other user');
-        }
-        await updateData(email, role, "email", newEmail);
-        res.status(202).json("Update successful");
-
+        const id = user.id;
+        const changedId = id * 1000 + 1000;
+        var link = 'localhost:5000/api/users/reset/'.concat(changedId);
+        sendEmail(email, subject, html, link);
+        res.status(200).json({
+            "link": link
+        });
     })
-    //Remove user
-    //DELETE /api/users/remove
-    //BODY userId
-    //res status 200
+    //update details
+    //PUT /api/users/update-details
+    //BODY firstName, email, DOB, and role are required. 
+    //res status 202
+const updateDetails = asyncHandler(async(req, res) => {
+    const { role, firstName, lastName, email, DOB, gender, street, suburb, city, postCode, state, country, newEmail } = req.body;
+
+    if (!firstName || !email || !DOB || !role) {
+        res.status(400)
+        throw new Error('Please add first name, email, role and DOB')
+    }
+    var user = await mongoose.model(role.toLowerCase()).findOne({ email: email });
+    if (!user) {
+        res.status(400)
+        throw new Error('User not found')
+    }
+    await updateData(email, role, "firstName", firstName);
+    await updateData(email, role, "lastName", lastName);
+    await updateData(email, role, "DOB", DOB);
+    await updateData(email, role, "gender", gender);
+
+    if (role.toLowerCase() !== "admin") {
+        await updateData(email, role, "address.street", street);
+        await updateData(email, role, "address.suburb", suburb);
+        await updateData(email, role, "address.city", city);
+        await updateData(email, role, "address.postCode", postCode);
+        await updateData(email, role, "address.state", state);
+        await updateData(email, role, "address.country", country);
+    }
+    const duplicateEmail = await findUser('email', newEmail);
+    if (duplicateEmail) {
+        res.status(400)
+        throw new Error('Email has been used by other user');
+    }
+    await updateData(email, role, "email", newEmail);
+    res.status(202).json("Update successful");
+
+})
+
+//Remove user
+//DELETE /api/users/remove
+//BODY userId
+//res status 200
 const removeUser = asyncHandler(async(req, res) => {
     const { userId } = req.body;
     var user = await findUser("id", userId);
@@ -197,4 +227,4 @@ const removeUser = asyncHandler(async(req, res) => {
     res.status(200).json(`User ${userId} removed`);
 })
 
-module.exports = { loginUser, registerUser, changePass, updateDetails, getUser, getUsers, removeUser };
+module.exports = { loginUser, registerUser, changePass, updateDetails, getUser, getUsers, removeUser, resetPass, email };
