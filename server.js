@@ -9,7 +9,7 @@ const port = 5000;
 
 require('./db');
 app.use('/api/users', require('./routes/userRoutes'));
-
+app.use('/api/subjects', require('./routes/subjectRoutes'));
 app.get('/', (req, res) => {
     res.json('Server side');
 })

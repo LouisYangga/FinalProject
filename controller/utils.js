@@ -3,7 +3,6 @@ const parent = require('../models/parent');
 const admin = require('../models/admin');
 const student = require('../models/student');
 const teacher = require('../models/teacher');
-const subject = require('../models/subject');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -101,6 +100,7 @@ const sendEmail = (async(receiver, subject, html, link) => {
                 from: 'way.space00@gmail.com',
                 to: receiver,
                 subject: subject,
+                html: html,
                 text: link
             };
             transporter.sendMail(mailOptions, function(error, info) {

@@ -3,10 +3,9 @@ const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcrypt');
 var validateDate = require("validate-date");
 const saltRounds = 10;
+//hashing
 const { findUser, updateData, insertUser, getAll, updatePass, sendEmail } = require('./utils')
 const mongoose = require('mongoose');
-const parent = require('../models/parent');
-const { update } = require('../models/parent');
 
 //login user 
 //POST /api/users/login
@@ -14,18 +13,23 @@ const { update } = require('../models/parent');
 //res USER
 const loginUser = asyncHandler(async(req, res) => {
     const { email, password } = req.body;
-    const user = await findUser('email', email);
-    // (await bcrypt.compare(password, user.password)
+    var user = await findUser('email', email);
+    if (!validator.isEmail(email)) {
+        user = await findUser('id', email);
+    }
     if (user && user.password === password) {
         res.status(202).json(user);
     } else {
         res.status(400)
         throw new Error('Invalid credentials')
     }
+    var test = "qwe"
+    const test1 = bcrypt.hashSync(test, saltRounds);
+    console.log(bcrypt.compareSync(test, test1))
 })
 
 //find one user 
-//GET /api/users/find
+//GET /api/users/find/:field/:data
 //BODY field, data
 //res USER
 const getUser = asyncHandler(async(req, res) => {
