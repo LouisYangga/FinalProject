@@ -7,7 +7,7 @@ const subject = require('../models/subject');
 
 
 // get students
-// GET/ api/users/subject/students
+// GET/ api/users/subjects/:id
 // BODY id (subject's id)
 // res children status 200
 const getStudents = asyncHandler(async(req, res) => {
@@ -15,6 +15,9 @@ const getStudents = asyncHandler(async(req, res) => {
     const course = await subjectDb.findOne({
         id: subjectId
     });
+    if (course === null) {
+        throw new Error('Subject not found');
+    }
     const studentId = course.enrolledStudentId;
     if (studentId.length === 0) {
         res.status(400).json('No enrolled Student');
@@ -29,7 +32,6 @@ const getStudents = asyncHandler(async(req, res) => {
             });
             if (student !== null) {
                 students.push(student);
-                console.log(students.length)
             }
         } catch (error) {
             throw new Error('error ' + error);
