@@ -3,11 +3,18 @@ const parent = require('../models/parent');
 const admin = require('../models/admin');
 const student = require('../models/student');
 const teacher = require('../models/teacher');
+const subject = require('../models/subject');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
-const getAll = asyncHandler(async() => {
+
+
+const getSubject = asyncHandler(async(subjectId) => {
+    return await subject.findOne({ id: subjectId });
+})
+
+const getAllUser = asyncHandler(async() => {
     var users = await teacher.find({});
     var parents = await parent.find({});
     var students = await student.find({});
@@ -113,4 +120,15 @@ const sendEmail = (async(receiver, subject, html, link) => {
         }
     })
 })
-module.exports = { findUser, updateData, insertUser, getAll, updatePass, sendEmail };
+
+const insertSubject = asyncHandler(async(body) => {
+    subject.insertMany(body, (error, result) => {
+        if (error) {
+            throw new Error(error);
+        } else {
+            return body;
+        }
+    })
+})
+
+module.exports = { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail, insertSubject, getSubject };

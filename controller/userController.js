@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 var validateDate = require("validate-date");
 const saltRounds = 10;
 //hashing
-const { findUser, updateData, insertUser, getAll, updatePass, sendEmail } = require('./utils')
+const { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail } = require('./utils')
 const mongoose = require('mongoose');
 
 //login user 
@@ -61,7 +61,7 @@ const getUser = asyncHandler(async(req, res) => {
     //BODY
     //res USERS
 const getUsers = asyncHandler(async(req, res) => {
-    var users = await getAll();
+    var users = await getAllUser();
     res.status(200).json(users)
 })
 
