@@ -15,9 +15,9 @@ const getSubject = asyncHandler(async(subjectId) => {
 })
 
 const getAllUser = asyncHandler(async() => {
-    var users = await teacher.find({});
-    var parents = await parent.find({});
-    var students = await student.find({});
+    var users = await teacher.find({}).select({ "_id": 0, "password": 0 });
+    var parents = await parent.find({}).select({ "_id": 0, "password": 0 });
+    var students = await student.find({}).select({ "_id": 0, "password": 0 });
 
     parents.forEach(parent => {
         users.push(parent);
