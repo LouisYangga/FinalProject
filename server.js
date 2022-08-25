@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 var cors = require('cors');
+global.__basedir = __dirname + "/..";
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors())
