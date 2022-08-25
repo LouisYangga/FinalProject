@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { exportStudents } = require('../controller/studentController');
+const { exportStudents, importStudents } = require('../controller/studentController');
 
+router.get('/upload', importStudents);
 router.get('/download', exportStudents);
 
 

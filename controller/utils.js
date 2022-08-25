@@ -7,6 +7,7 @@ const subject = require('../models/subject');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const fs = require('fs');
+var validateDate = require("validate-date");
 
 
 
@@ -89,6 +90,40 @@ const insertUser = asyncHandler(async(role, body) => {
     })
 })
 
+const register = asyncHandler(async(body) => {
+    if (!body.firstName || !body.email || !body.password || !body.role) {
+        throw new Error('Please add all fields')
+    }
+    if (!validateDate(body.DOB, responseType = "boolean", dateFormat = "dd/mm/yyyy")) {
+        throw new Error('Please input proper date format dd/mm/yyy')
+    }
+    var roles = body.role.toLowerCase();
+    if (roles !== "student" && roles !== "parent" && roles !== "teacher") {
+        throw Error("Invalid Role");
+    }
+    var userID = (Math.floor(Math.random() * 100)) + 999;
+    const duplicateEmail = await findUser('email', body.email);
+    var duplicateID = true;
+    if (duplicateEmail) {
+        throw new Error('Email has been used')
+    }
+    while (duplicateID) {
+        userID = (Math.floor(Math.random() * 100)) + 999;
+        body.id = userID;
+        duplicateID = await findUser('id', userID)
+    }
+
+    if (await insertUser(roles, body) !== null) {
+        if (roles === 'student' && body.parentId !== undefined) {
+            await mongoose.model("parent").updateOne({
+                id: body.parentId
+            }, {
+                $push: { enrolledChildrenId: userID }
+            })
+        }
+        return body;
+    }
+})
 const sendEmail = (async(receiver, subject, html, link) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -131,4 +166,4 @@ const insertSubject = asyncHandler(async(body) => {
     })
 })
 
-module.exports = { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail, insertSubject, getSubject };
+module.exports = { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail, insertSubject, getSubject, register };

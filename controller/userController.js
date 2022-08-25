@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 var validateDate = require("validate-date");
 const saltRounds = 10;
 //hashing
-const { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail } = require('./utils')
+const { findUser, updateData, getAllUser, updatePass, sendEmail, register } = require('./utils')
 const mongoose = require('mongoose');
 
 //login user 
@@ -72,51 +72,19 @@ const getUsers = asyncHandler(async(req, res) => {
 
 const registerUser = asyncHandler(async(req, res) => {
     const { role, firstName, lastName, email, password, DOB, gender, parentId } = req.body;
-
-    if (!firstName || !email || !password || !role) {
-        res.status(400)
-        throw new Error('Please add all fields')
-    }
-
-    if (!validateDate(DOB, responseType = "boolean", dateFormat = "dd/mm/yyyy")) {
-        res.status(400)
-        throw new Error('Please input proper date format dd/mm/yyy')
-    }
-    var roles = role.toLowerCase();
-    if (roles !== "student" && roles !== "parent" && roles !== "teacher") {
-        res.status(400)
-        console.log(roles);
-        throw Error("Invalid Role");
-    }
-    var userID = (Math.floor(Math.random() * 100)) + 999;
-    const duplicateEmail = await findUser('email', email);
-    var duplicateID = true;
-    if (duplicateEmail) {
-        res.status(400)
-        throw new Error('Email has been used')
-    }
-    while (duplicateID) {
-        userID = (Math.floor(Math.random() * 100)) + 999;
-        req.body.id = userID;
-        duplicateID = await findUser('id', userID)
-    }
-
-    if (await insertUser(roles, req.body) !== null) {
-        if (roles === 'student' && parentId !== null) {
-            await mongoose.model("parent").updateOne({
-                id: parentId
-            }, {
-                $push: { enrolledChildrenId: userID }
-            })
-        }
+    try {
+        const body = await register(req.body);
         res.status(200).json({
-            "user id": userID,
-            "email": email,
-            "role": roles,
-            "parentID": parentId
+            "role": body.role,
+            "User Id": body.userId,
+            "full name": body.firstName + " " + body.lastName,
+            "email": body.email,
+            "parentId": body.parentId
         });
+    } catch (error) {
+        res.status(400).json("Something went wrong");
+        throw new Error(error);
     }
-    console.log('User has been registered, thank you :)');
 })
 
 //change password

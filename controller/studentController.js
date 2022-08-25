@@ -1,10 +1,11 @@
 const excelJS = require('exceljs');
 const asyncHandler = require('express-async-handler')
 const studentDb = require('../models/student')
-
-//Export students
-//GET /api/users/students/download
-//res status 200
+const { register } = require('../controller/utils')
+    // const fetch = require('node-fetch');
+    //Export students
+    //GET /api/users/students/download
+    //res status 200
 const exportStudents = asyncHandler(async(req, res) => {
     try {
         const workBook = new excelJS.Workbook();
@@ -35,6 +36,49 @@ const exportStudents = asyncHandler(async(req, res) => {
     } catch (error) {
         throw new Error(error);
     }
-
 })
-module.exports = { exportStudents };
+
+const importStudents = asyncHandler(async(req, res) => {
+    const workBook = new excelJS.Workbook();
+    const datas = [];
+    var errors = [];
+    const registered = 0;
+    await workBook.xlsx.readFile('./students.xlsx').then(function() {
+        var workSheet = workBook.getWorksheet('Students');
+        var firstName, lastName, email, password, DOB, gender;
+        workSheet.eachRow({ includeEmpty: true }, async function(row, rowNumber) {
+            if (rowNumber > 1) {
+                role = 'student';
+                firstName = row.getCell(1).value;
+                lastName = row.getCell(2).value;
+                gender = row.getCell(3).value;
+                email = row.getCell(4).value;
+                DOB = row.getCell(5).value;
+                password = row.getCell(6).value
+                parentId = row.getCell(7).value;
+                var data = {
+                    role,
+                    firstName,
+                    lastName,
+                    gender,
+                    DOB,
+                    email,
+                    password,
+                    parentId
+                };
+                datas.push(data);
+            }
+        })
+    })
+    for (let data of datas) {
+        try {
+            const inserted = await register(data);
+            if (inserted !== null) {
+                registered++;
+            }
+        } catch (error) {
+            errors.push(error + ", email " + data.email);
+        }
+    }
+})
+module.exports = { exportStudents, importStudents };
