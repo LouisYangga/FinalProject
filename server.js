@@ -6,7 +6,6 @@ app.use(express.json());
 app.use(cors())
 
 const port = 5000;
-
 require('./db');
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/subjects', require('./routes/subjectRoutes'));

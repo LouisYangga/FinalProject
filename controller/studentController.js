@@ -42,9 +42,11 @@ const importStudents = asyncHandler(async(req, res) => {
     const workBook = new excelJS.Workbook();
     const datas = [];
     var errors = [];
-    const registered = 0;
-    await workBook.xlsx.readFile('./students.xlsx').then(function() {
-        var workSheet = workBook.getWorksheet('Students');
+    var registered = 0;
+    var totalRow = 0;
+    const path = req.body;
+    await workBook.xlsx.readFile(path).then(function() {
+        var workSheet = workBook.worksheets[0];
         var firstName, lastName, email, password, DOB, gender;
         workSheet.eachRow({ includeEmpty: true }, async function(row, rowNumber) {
             if (rowNumber > 1) {
@@ -67,18 +69,25 @@ const importStudents = asyncHandler(async(req, res) => {
                     parentId
                 };
                 datas.push(data);
+                totalRow++;
             }
         })
     })
     for (let data of datas) {
         try {
-            const inserted = await register(data);
+            var inserted = await register(data);
             if (inserted !== null) {
                 registered++;
             }
         } catch (error) {
-            errors.push(error + ", email " + data.email);
+            errors.push(error + ", email: " + data.email);
         }
+    }
+    if (errors !== null) {
+        res.status(400).json(errors);
+        throw new Error((totalRow - registered) + " students are not registered from total: " + totalRow);
+    } else {
+        res.status(200).json('All students are inserted ' + registered);
     }
 })
 module.exports = { exportStudents, importStudents };
