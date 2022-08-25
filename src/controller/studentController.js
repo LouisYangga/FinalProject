@@ -39,67 +39,60 @@ const exportStudents = asyncHandler(async(req, res) => {
 })
 
 const importStudents = asyncHandler(async(req, res) => {
-    try {
-        if (req.file == undefined) {
-            return res.status(400).send("Please upload an excel file!");
-        }
-        let path =
-            __basedir + "/resources/static/assets/uploads/" + req.file.filename;
-        const workBook = new excelJS.Workbook();
-        const datas = [];
-        var errors = [];
-        var registered = 0;
-        var totalRow = 0;
+    if (req.file == undefined) {
+        return res.status(400).send("Please upload an excel file!");
+    }
+    let path =
+        __basedir + "/resources/static/assets/uploads/" + req.file.filename;
+    const workBook = new excelJS.Workbook();
+    const datas = [];
+    var errors = [];
+    var registered = 0;
+    var totalRow = 0;
 
-        await workBook.xlsx.readFile(path).then(function() {
-            var workSheet = workBook.worksheets[0];
-            var firstName, lastName, email, password, DOB, gender;
-            workSheet.eachRow({ includeEmpty: true }, async function(row, rowNumber) {
-                if (rowNumber > 1) {
-                    role = 'student';
-                    firstName = row.getCell(1).value;
-                    lastName = row.getCell(2).value;
-                    gender = row.getCell(3).value;
-                    email = row.getCell(4).value;
-                    DOB = row.getCell(5).value;
-                    password = row.getCell(6).value
-                    parentId = row.getCell(7).value;
-                    var data = {
-                        role,
-                        firstName,
-                        lastName,
-                        gender,
-                        DOB,
-                        email,
-                        password,
-                        parentId
-                    };
-                    datas.push(data);
-                    totalRow++;
-                }
-            })
-        })
-        for (let data of datas) {
-            try {
-                var inserted = await register(data);
-                if (inserted !== null) {
-                    registered++;
-                }
-            } catch (error) {
-                errors.push(error + ", email: " + data.email);
+    await workBook.xlsx.readFile(path).then(function() {
+        var workSheet = workBook.worksheets[0];
+        var firstName, lastName, email, password, DOB, gender;
+        workSheet.eachRow({ includeEmpty: true }, async function(row, rowNumber) {
+            if (rowNumber > 1) {
+                role = 'student';
+                firstName = row.getCell(1).value;
+                lastName = row.getCell(2).value;
+                gender = row.getCell(3).value;
+                email = row.getCell(4).value;
+                DOB = row.getCell(5).value;
+                password = row.getCell(6).value
+                parentId = row.getCell(7).value;
+                var data = {
+                    role,
+                    firstName,
+                    lastName,
+                    gender,
+                    DOB,
+                    email,
+                    password,
+                    parentId
+                };
+                datas.push(data);
+                totalRow++;
             }
+        })
+    })
+    for (let data of datas) {
+        try {
+            var inserted = await register(data);
+            if (inserted !== null) {
+                registered++;
+            }
+        } catch (error) {
+            errors.push(error + ", email: " + data.email);
         }
-        if (errors !== null) {
-            res.status(400).json(errors);
-            throw new Error((totalRow - registered) + " students are not registered from total: " + totalRow);
-        } else {
-            res.status(200).json('All students are inserted ' + registered);
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({
-            message: "Could not upload the file: " + req.file.originalname,
-        });
+    }
+    if (errors !== null) {
+        res.status(400).json(errors);
+        throw new Error((totalRow - registered) + " students are not registered from total: " + totalRow);
+    } else {
+        res.status(200).json('All students are inserted ' + registered);
     }
 })
 module.exports = { exportStudents, importStudents };
