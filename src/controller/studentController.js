@@ -60,7 +60,7 @@ const importStudents = asyncHandler(async(req, res) => {
                 lastName = row.getCell(2).value;
                 gender = row.getCell(3).value;
                 email = row.getCell(4).value;
-                DOB = row.getCell(5).value;
+                DOB = row.getCell(5).value.toLocaleDateString('en-GB');
                 password = row.getCell(6).value
                 parentId = row.getCell(7).value;
                 var data = {
@@ -73,6 +73,7 @@ const importStudents = asyncHandler(async(req, res) => {
                     password,
                     parentId
                 };
+                console.log(DOB);
                 datas.push(data);
                 totalRow++;
             }
