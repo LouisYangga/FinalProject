@@ -2,10 +2,11 @@ const excelJS = require('exceljs');
 const asyncHandler = require('express-async-handler')
 const studentDb = require('../models/student')
 const { register } = require('../controller/utils')
-    // const fetch = require('node-fetch');
-    //Export students
-    //GET /api/users/students/download
-    //res status 200
+const fs = require('fs');
+// const fetch = require('node-fetch');
+//Export students
+//GET /api/users/students/download
+//res status 200
 const exportStudents = asyncHandler(async(req, res) => {
     try {
         const workBook = new excelJS.Workbook();
@@ -73,7 +74,6 @@ const importStudents = asyncHandler(async(req, res) => {
                     password,
                     parentId
                 };
-                console.log(DOB);
                 datas.push(data);
                 totalRow++;
             }
@@ -89,6 +89,7 @@ const importStudents = asyncHandler(async(req, res) => {
             errors.push(error + ", email: " + data.email);
         }
     }
+    fs.unlinkSync(path);
     if (errors !== null) {
         res.status(400).json(errors);
         throw new Error((totalRow - registered) + " students are not registered from total: " + totalRow);
