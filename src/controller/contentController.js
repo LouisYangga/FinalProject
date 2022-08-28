@@ -1,1 +1,1 @@
-const contentDb = require('../models/subjectContent')
+const contentDb = require('../models/content');

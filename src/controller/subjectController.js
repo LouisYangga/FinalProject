@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler')
 var validateDate = require("validate-date");
 const studentDb = require('../models/student');
 const subjectDb = require('../models/subject');
+const contentDb = require('../models/content');
 const { insertSubject, getSubject } = require('../controller/utils');
 
 //get subject
