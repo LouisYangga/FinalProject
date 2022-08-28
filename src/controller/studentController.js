@@ -3,7 +3,6 @@ const asyncHandler = require('express-async-handler')
 const studentDb = require('../models/student')
 const { register } = require('../controller/utils')
 const fs = require('fs');
-// const fetch = require('node-fetch');
 //Export students
 //GET /api/users/students/download
 //res status 200
