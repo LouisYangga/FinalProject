@@ -1,9 +1,9 @@
 const asyncHandler = require('express-async-handler')
-var validateDate = require("validate-date");
 const studentDb = require('../models/student');
 const subjectDb = require('../models/subject');
 const contentDb = require('../models/content');
 const { insertSubject, getSubject } = require('../controller/utils');
+const content = require('../models/content');
 
 //get subject
 //GET method
@@ -91,6 +91,7 @@ const removeSubject = asyncHandler(async(req, res) => {
             }
         }))
     }
+    await contentDb.deleteOne({ subjectId: id });
     await subjectDb.deleteOne({ id: id });
     res.status(200).json('Subject deleted');
 })
@@ -114,16 +115,18 @@ const addSubject = asyncHandler(async(req, res) => {
     }
 
     if (startDate) {
-        if (!validateDate(startDate, responseType = "boolean", dateFormat = "dd/mm/yyyy")) {
-            res.status(400)
-            throw new Error('Please input proper date format dd/mm/yyy')
+        const start = checkDate(startDate);
+        if (start !== null) {
+            res.status(400).json(start);
+            throw new Error(start);
         }
     }
 
     if (endDate) {
-        if (!validateDate(endDate, responseType = "boolean", dateFormat = "dd/mm/yyyy")) {
-            res.status(400)
-            throw new Error('Please input proper date format dd/mm/yyy')
+        const end = checkDate(endDate);
+        if (end !== null) {
+            res.status(400).json(end);
+            throw new Error(end);
         }
     }
 

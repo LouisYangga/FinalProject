@@ -166,4 +166,11 @@ const insertSubject = asyncHandler(async(body) => {
     })
 })
 
-module.exports = { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail, insertSubject, getSubject, register };
+const checkDate = ((date) => {
+    if (!validateDate(date, responseType = "boolean", dateFormat = "dd/mm/yyyy")) {
+        return 'Please input proper date format dd/mm/yyy';
+    } else {
+        return null;
+    }
+})
+module.exports = { findUser, updateData, insertUser, getAllUser, updatePass, sendEmail, insertSubject, getSubject, register, checkDate };

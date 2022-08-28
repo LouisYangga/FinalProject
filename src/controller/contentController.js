@@ -1,44 +1,97 @@
 const contentDb = require('../models/content');
 const asyncHandler = require('express-async-handler')
-var validateDate = require("validate-date");
+const content = require('../models/content');
+const { checkDate } = require('./utils');
 
-//get activities
-//GET method
-// /:id
-//res status 200 and activities of the subject
+const convertToISO = ((date) => {
+        const [day, month, year] = date.toString().split('/');
+        date = new Date(+year, +month - 1, +day + 1);
+        return date.toISOString();
+    })
+    //get activities
+    //GET method
+    // /:id
+    //res status 200 and activities of the subject
 const getActivities = asyncHandler(async(req, res) => {
     const id = req.params.id;
     const activities = await contentDb.findOne({ id }, { activities: 1, _id: 0 });
     res.status(200).json(activities);
 })
 
+//get by date
+//POST method
+// date, subject id
+//res status 200 and activities 7 days ahead
+const getByDate = asyncHandler(async(req, res) => {
+    var { date, subjectId } = req.body;
+    const check = checkDate(date);
+    const subject = await contentDb.findOne({ subjectId });
+
+    if (check !== null) {
+        res.status(400).json(check);
+        throw new Error(check);
+    }
+    const [day, month, year] = date.split('/');
+    date = new Date(+year, +month - 1, +day + 1);
+    var ahead = new Date();
+    ahead.setDate(date.getDate() + 7);
+
+    if (subject === null) {
+        res.status(400).json('subject not found');
+        throw new Error('subject not found');
+    }
+
+    const activities = subject.activities;
+    var results = new Array();
+    await activities.forEach(activity => {
+        const aDate = activity.startDate;
+        if (aDate < ahead && aDate >= date) {
+            results.push(activity);
+        }
+    });
+    res.status(200).json(results)
+
+})
+
+
 //add activities
 //PUT method
 //{subjectId, name, type, totalMarks, dueDate}
 //res status 200 and the activities
 const addActivities = asyncHandler(async(req, res) => {
-    const { subjectId, name, type, totalMarks, dueDate } = req.body;
+    var { subjectId, name, type, totalMarks, dueDate, startDate } = req.body;
     const subject = await contentDb.findOne({ subjectId });
 
     if (!subject) {
         res.status(400).json('Subject not found');
         throw new Error('Subject Not Found');
     }
-    if (subject.name === name) {
-        res.status(400).json('Subject name has been used');
-        throw new Error('Subject name has been used')
+
+    const activities = subject.activities;
+    if (activities.find(a => a.name === name)) {
+        res.status(400).json('Activity name has been used');
+        throw new Error('Activity name has been used');
     }
-    if (!validateDate(dueDate, responseType = "boolean", dateFormat = "dd/mm/yyyy")) {
-        res.status(400)
-        throw new Error('Please input proper date format dd/mm/yyy')
+    const due = checkDate(dueDate)
+    if (due !== null) {
+        res.status(400).json(due);
+        throw new Error(due);
     }
+    const start = checkDate(startDate)
+    if (start !== null) {
+        res.status(400).json(start)
+        throw new Error(start);
+    }
+    startDate = convertToISO(startDate);
+    dueDate = convertToISO(dueDate);
     const added = await contentDb.updateOne({ subjectId: subjectId }, {
-        $push: {
+        $addToSet: {
             activities: {
                 name: name,
                 type: type,
                 totalMarks: totalMarks,
-                dueDate: dueDate
+                dueDate: dueDate,
+                startDate: startDate
             }
         }
     })
@@ -61,7 +114,10 @@ const addActivities = asyncHandler(async(req, res) => {
 //res status 200
 const removeActivity = asyncHandler(async(req, res) => {
     const { subjectId, activityName } = req.body;
-
+    if (!subjectId || !activityName) {
+        res.status(400).json('Information not enough');
+        throw new Error('Information not enough');
+    }
     const deleted = await contentDb.updateOne({ subjectId }, {
         $pull: {
             activities: {
@@ -76,4 +132,6 @@ const removeActivity = asyncHandler(async(req, res) => {
         throw new Error('Something Went Wrong');
     }
 })
-module.exports = { getActivities, addActivities, removeActivity };
+
+
+module.exports = { getActivities, addActivities, removeActivity, getByDate };
