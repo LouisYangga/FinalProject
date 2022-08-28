@@ -133,6 +133,10 @@ const addSubject = asyncHandler(async(req, res) => {
         throw new Error('Subject not inserted');
     }
 
+    contentDb.insertMany({
+        subjectId: id,
+        subjectName: subjectName
+    })
     res.status(200).json(req.body);
 })
 module.exports = { getStudents, getAllSubject, removeSubject, addSubject, getOne }

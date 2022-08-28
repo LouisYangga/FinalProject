@@ -6,7 +6,10 @@ const subjectContentSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Generate ID Fail']
     },
-
+    subjectName: {
+        type: String,
+        required: [true, "Please specify the subject's name"]
+    },
     activities: [{
         name: {
             type: String,
@@ -26,6 +29,10 @@ const subjectContentSchema = new mongoose.Schema({
             min: 0,
             max: 100
         },
+        startDate: {
+            type: Date,
+            required: [true, "Please specify the start date for the activity"]
+        },
         dateCreated: {
             type: Date,
             required: true,
@@ -34,7 +41,8 @@ const subjectContentSchema = new mongoose.Schema({
         dueDate: {
             type: Date,
             required: [true, "Please specify the due date for the activity"]
-        }
+        },
+        _id: false
     }]
 })
 
